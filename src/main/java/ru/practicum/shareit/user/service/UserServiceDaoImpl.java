@@ -1,10 +1,12 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ValidateException;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +21,9 @@ public class UserServiceDaoImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = userMapper.userDtotoUser(userDto);
-        if (repository.isEmailExisted(user.getEmail())) {
-            throw new ValidateException("User with email = " + userDto.getEmail() + " exists");
-        }
-        log.info("User with email = {}  has been created", userDto.getEmail());
-        return userMapper.userToUserDto(repository.createUser(user));
+        User newUser = repository.createUser(user);
+        log.info("{} has been created", userDto);
+        return userMapper.userToUserDto(newUser);
     }
 
     @Override
@@ -46,16 +46,14 @@ public class UserServiceDaoImpl implements UserService {
     @Override
     public UserDto updateUserById(Long id, UserDto userDto) {
         User user = repository.getUserById(id);
+        userDto.setId(id);
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
             user.setName(userDto.getName());
+        } else {
+            userDto.setName(user.getName());
         }
         if (userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
-            if (repository.isEmailExisted(userDto.getEmail())) {
-                if (!userDto.getEmail().equals(user.getEmail())) {
-                    log.info("User with email with id = {} exists", user.getId());
-                    throw new ValidateException("User with email " + userDto.getEmail() + " exists");
-                }
-            }
+            repository.updateUser(userMapper.userDtotoUser(userDto));
             user.setEmail(userDto.getEmail());
         }
         log.info("User with id = {} is updated", user.getId());

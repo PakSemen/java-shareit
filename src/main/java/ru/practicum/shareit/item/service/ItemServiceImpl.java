@@ -1,15 +1,18 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,18 +27,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         User user = userRepository.getUserById(userId);
-        Item item = itemMapper.itemDtoToItem(itemDto);
-        item.setOwner(user);
+        Item item = itemMapper.itemDtoToItem(itemDto, user);
         log.info("Item with id = {} has been created", item.getId());
         return itemMapper.itemToItemDto(itemRepository.createItem(item, user));
     }
 
     @Override
     public List<ItemDto> getAllItems(Long userId) {
-        List<ItemDto> items = new ArrayList<>();
-        for (Item item : itemRepository.getAllItems(userId)) {
-            items.add(itemMapper.itemToItemDto(item));
-        }
+        List<ItemDto> items = itemMapper.itemListToItemDtoList(itemRepository.getAllItems(userId));
         log.info("Get all items");
         return items;
     }
@@ -73,9 +72,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItemByText(String text, Long userId) {
-        if (text.isBlank()) {
-            return List.of();
+        if (text == null || text.isBlank()) {
+            return Collections.emptyList();
         }
+
         List<ItemDto> items = new ArrayList<>();
         for (Item item : itemRepository.searchItemByText(text, userId)) {
             items.add(itemMapper.itemToItemDto(item));

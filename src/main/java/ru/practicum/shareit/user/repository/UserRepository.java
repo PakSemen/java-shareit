@@ -1,4 +1,6 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.repository;
+
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
@@ -11,5 +13,5 @@ public interface UserRepository {
 
     User removeUserById(Long userId);
 
-    Boolean isEmailExisted(String email);
+    void updateUser(User user);
 }
