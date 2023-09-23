@@ -11,15 +11,16 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.comment.Comment;
-import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.model.Comment;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.CommentMapper;
-import ru.practicum.shareit.item.comment.CommentRepository;
+import ru.practicum.shareit.item.comment.repository.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -31,8 +32,7 @@ import static java.util.Comparator.comparing;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static ru.practicum.shareit.item.comment.CommentMapper.commentToCommentDto;
 import static ru.practicum.shareit.item.dto.ItemMapper.*;
-import static ru.practicum.shareit.user.UserMapper.ownerToUser;
-import static ru.practicum.shareit.user.UserMapper.userDtotoUser;
+import static ru.practicum.shareit.user.UserMapper.*;
 
 @Slf4j
 @Service
@@ -42,12 +42,13 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
 
     public ItemDto createItem(ItemShortDto itemShortDto, Long userId) {
         ItemDto itemDto = itemShortDtoToItemDto(itemShortDto);
-        itemDto.setOwner(ownerToUser(userService.getUserById(userId)));
+        itemDto.setOwner(ownerToUser(userToUserDto(userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with id = " + userId + " has not found")))));
         log.info("Item with id = {} has been created", itemDto.getId());
         return itemToItemDto(itemRepository.save(itemDtoToItem(itemDto)));
     }
@@ -109,16 +110,17 @@ public class ItemServiceImpl implements ItemService {
                 .builder()
                 .text(commentDto.getText())
                 .build();
-        comment.setAuthor(userDtotoUser(userService.getUserById(userId)));
+        comment.setAuthor(userDtotoUser((userToUserDto(userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with id = " + userId + " has not found"))))));
 
         comment.setItem((itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item  hasn't be found"))));
 
-        comment.setAuthor(userDtotoUser(userService.getUserById(userId)));
+        comment.setAuthor(userDtotoUser((userToUserDto(userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with id = " + userId + " has not found"))))));
         if (!bookingRepository.existsByBookerIdAndEndBeforeAndStatus(userId, LocalDateTime.now(), Status.APPROVED)) {
             throw new NotAvailableException("Comment can't be created");
         }
-        comment.setCreated(LocalDateTime.now());
         log.info("Comment has been added");
         return commentToCommentDto(commentRepository.save(comment));
     }
