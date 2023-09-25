@@ -2,68 +2,88 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.DataAlreadyExistException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.user.UserMapper.userDtotoUser;
+import static ru.practicum.shareit.user.UserMapper.userToUserDto;
+
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceDaoImpl implements UserService {
     private final UserRepository repository;
-    private final UserMapper userMapper;
+    private final ItemRepository itemRepository;
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = userMapper.userDtotoUser(userDto);
-        User newUser = repository.createUser(user);
-        log.info("{} has been created", userDto);
-        return userMapper.userToUserDto(newUser);
+        User user = userDtotoUser(userDto);
+        log.info("User with email = {}  has been created", userDto.getEmail());
+        try {
+            return userToUserDto(repository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            throw new DataAlreadyExistException(String.format(
+                    "User %s has been registered yet", userDto.getEmail()
+            ));
+        }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getAllUsers() {
-        List<UserDto> usersDto = new ArrayList<>();
-        for (User user : repository.getAllUsers()) {
-            usersDto.add(userMapper.userToUserDto(user));
-        }
         log.info("Get all user");
-        return usersDto;
+        return repository.findAll()
+                .stream()
+                .map(UserMapper::userToUserDto)
+                .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDto getUserById(Long id) {
-        User user = repository.getUserById(id);
+        User user = repository.findById(id).orElseThrow(() ->
+                new NotFoundException("User with id = " + id + " has not found"));
         log.info("User with id = {} is uploaded", id);
-        return userMapper.userToUserDto(user);
+        return userToUserDto(user);
     }
 
     @Override
     public UserDto updateUserById(Long id, UserDto userDto) {
-        User user = repository.getUserById(id);
-        userDto.setId(id);
+        User user = repository.findById(id).orElseThrow(() -> new NotFoundException("Error"));
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
             user.setName(userDto.getName());
-        } else {
-            userDto.setName(user.getName());
         }
         if (userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
-            repository.updateUser(userMapper.userDtotoUser(userDto));
             user.setEmail(userDto.getEmail());
         }
-        log.info("User with id = {} is updated", user.getId());
-        return userMapper.userToUserDto(user);
+        log.info("User with id = {} is updated", userDto.getId());
+        try {
+            return userToUserDto(repository.saveAndFlush(user));
+        } catch (DataIntegrityViolationException e) {
+            throw new DataAlreadyExistException("Already exists");
+        }
     }
 
     @Override
-    public UserDto removeUserById(Long id) {
-        User user = repository.removeUserById(id);
+    public Boolean removeUserById(Long id) {
+        if (repository.existsById(id)) {
+            itemRepository.deleteAll(itemRepository.findAllByOwnerId(id));
+            repository.deleteById(id);
+        }
         log.info("User with id = {} removed", id);
-        return userMapper.userToUserDto(user);
+        return !repository.existsById(id);
     }
 }
