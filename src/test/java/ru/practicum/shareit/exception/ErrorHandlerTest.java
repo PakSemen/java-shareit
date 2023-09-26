@@ -19,7 +19,7 @@ public class ErrorHandlerTest {
 
     @Test
     public void alreadyExistsExceptionTest() {
-        DataAlreadyExistException exception = new DataAlreadyExistException ("Already exists error");
+        DataAlreadyExistException exception = new DataAlreadyExistException("Already exists error");
         ErrorResponse response = errorHandler.alreadyExistsException(exception);
         assertEquals("Already exists error", response.getError());
     }
