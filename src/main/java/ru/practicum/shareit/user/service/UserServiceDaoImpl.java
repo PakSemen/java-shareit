@@ -26,19 +26,12 @@ import static ru.practicum.shareit.user.UserMapper.userToUserDto;
 @Transactional
 public class UserServiceDaoImpl implements UserService {
     private final UserRepository repository;
-    private final ItemRepository itemRepository;
 
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = userDtotoUser(userDto);
         log.info("User with email = {}  has been created", userDto.getEmail());
-        try {
-            return userToUserDto(repository.save(user));
-        } catch (DataIntegrityViolationException e) {
-            throw new DataAlreadyExistException(String.format(
-                    "User %s has been registered yet", userDto.getEmail()
-            ));
-        }
+        return userToUserDto(repository.save(user));
     }
 
     @Transactional(readOnly = true)
