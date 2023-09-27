@@ -70,20 +70,12 @@ public class UserServiceDaoImpl implements UserService {
             user.setEmail(userDto.getEmail());
         }
         log.info("User with id = {} is updated", userDto.getId());
-        try {
-            return userToUserDto(repository.saveAndFlush(user));
-        } catch (DataIntegrityViolationException e) {
-            throw new DataAlreadyExistException("Already exists");
-        }
+        repository.saveAndFlush(user);
+        return userToUserDto(user);
     }
 
     @Override
-    public Boolean removeUserById(Long id) {
-        if (repository.existsById(id)) {
-            itemRepository.deleteAll(itemRepository.findAllByOwnerId(id));
-            repository.deleteById(id);
-        }
-        log.info("User with id = {} removed", id);
-        return !repository.existsById(id);
+    public void removeUserById(Long id) {
+        repository.deleteById(id);
     }
 }
