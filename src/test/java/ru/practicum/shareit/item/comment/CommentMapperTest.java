@@ -7,9 +7,9 @@ import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import java.time.LocalDateTime;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class CommentMapperTest {
     private Item item;

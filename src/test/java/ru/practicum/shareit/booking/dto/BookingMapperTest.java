@@ -2,8 +2,8 @@ package ru.practicum.shareit.booking.dto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
