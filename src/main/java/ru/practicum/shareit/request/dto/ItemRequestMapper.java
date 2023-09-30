@@ -3,15 +3,21 @@ package ru.practicum.shareit.request.dto;
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @UtilityClass
 public class ItemRequestMapper {
 
-    public static ItemRequest itemRequestShortDtoToItemRequest(ItemRequestShortDto itemRequestShortDto) {
+    public static ItemRequest itemRequestShortDtoToItemRequest(ItemRequestShortDto itemRequestShortDto, User user) {
         return ItemRequest.builder()
                 .description(itemRequestShortDto.getDescription())
+                .requester(user)
+                .created(Timestamp.valueOf(LocalDateTime.now()))
                 .build();
     }
 
@@ -24,11 +30,12 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public static ItemRequestDto itemRequestToRequestWithItems(ItemRequest itemRequest) {
+    public static ItemRequestDto itemRequestToRequestWithItems(ItemRequest itemRequest, List<ItemDto> items) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
                 .created(itemRequest.getCreated())
+                .items(items.isEmpty() ? new ArrayList<>() : items)
                 .build();
     }
 
@@ -44,6 +51,5 @@ public class ItemRequestMapper {
                 itemRequest.getRequester().getId(),
                 itemRequest.getCreated(), items);
     }
-
 }
 

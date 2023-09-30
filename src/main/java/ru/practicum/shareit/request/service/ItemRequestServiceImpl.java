@@ -17,6 +17,7 @@ import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.sql.Timestamp;
@@ -34,20 +35,17 @@ import static ru.practicum.shareit.request.dto.ItemRequestMapper.itemRequestToRe
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRequestRepository itemRequestsRepository;
     private final ItemRepository itemRepository;
 
     @Override
+    @Transactional
     public ItemRequestDto createRequest(Long id, ItemRequestShortDto itemRequestShortDto) {
-        ItemRequest itemRequest = ItemRequestMapper.itemRequestShortDtoToItemRequest(itemRequestShortDto);
-
-        itemRequest.setRequester(userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User hasn't found")));
-
-        itemRequest.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User hasn't found"));
+        ItemRequest itemRequest = ItemRequestMapper.itemRequestShortDtoToItemRequest(itemRequestShortDto, user);
 
         log.info("Get all user's request with id = {}", id);
         return itemRequestToRequestDto(itemRequestsRepository.save(itemRequest));
@@ -60,11 +58,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestsRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request hasn't found"));
 
-        ItemRequestDto request = itemRequestToRequestWithItems(itemRequest);
         List<ItemDto> items = itemRepository.findAllByRequestId(requestId).stream()
                 .map(ItemMapper::itemToItemDto).collect(Collectors.toList());
+        ItemRequestDto request = itemRequestToRequestWithItems(itemRequest, items);
 
-        request.setItems(items.isEmpty() ? new ArrayList<>() : items);
         log.info("Get request by id = {}", requestId);
         return request;
 

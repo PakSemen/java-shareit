@@ -2,12 +2,16 @@ package ru.practicum.shareit.request.dto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
+import java.io.PushbackReader;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -38,14 +42,16 @@ class ItemRequestMapperTest {
     @Test
     void itemRequestShortDtoToItemRequestTest() {
         ItemRequestShortDto itemRequestShortDto = new ItemRequestShortDto(itemRequest.getId(), itemRequest.getDescription());
-        ItemRequest itemRequest = ItemRequestMapper.itemRequestShortDtoToItemRequest(itemRequestShortDto);
+        User user = new User();
+        ItemRequest itemRequest = ItemRequestMapper.itemRequestShortDtoToItemRequest(itemRequestShortDto, user);
 
         assertThat(itemRequest.getDescription()).isEqualTo(itemRequestShortDto.getDescription());
     }
 
     @Test
     void itemRequestToRequestWithItemsTest() {
-        ItemRequestDto itemRequestDto = ItemRequestMapper.itemRequestToRequestWithItems(itemRequest);
+        List<ItemDto> items = new ArrayList<>();
+        ItemRequestDto itemRequestDto = ItemRequestMapper.itemRequestToRequestWithItems(itemRequest,items);
 
         assertThat(itemRequestDto.getId()).isEqualTo(itemRequest.getId());
         assertThat(itemRequestDto.getDescription()).isEqualTo(itemRequest.getDescription());
