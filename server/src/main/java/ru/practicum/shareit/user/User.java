@@ -11,7 +11,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
