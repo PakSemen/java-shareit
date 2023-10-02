@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -94,6 +95,30 @@ class ItemControllerTest {
                         .content(objectMapper.writeValueAsString(itemDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void createItemWithEmptyDescriptionValidationTest() throws Exception {
+        when(itemService.createItem(any(), anyLong())).thenThrow(new ValidationException("The description can't be empty"));
+        itemDto.setDescription("");
+        mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(itemDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void createItemWithEmptyNameValidationTest() throws Exception {
+        when(itemService.createItem(any(), anyLong())).thenThrow(new ValidationException("The name can't be empty"));
+        itemDto.setName("");
+        mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(itemDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -198,6 +223,20 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(commentDto.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())))
                 .andExpect(jsonPath("$.created", is(commentDto.getCreated())));
+    }
+
+    @Test
+    public void addEmptyCommentValidationTest() throws Exception {
+        CommentDto commentDto = CommentDto.builder()
+                .text("")
+                .build();
+        when(itemService.addComment(any(), anyLong(), anyLong())).thenThrow(new ValidationException("Отсутствует текст поискового запроса"));
+        mockMvc.perform(post("/items/{itemId}/comment", 1L)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(commentDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
