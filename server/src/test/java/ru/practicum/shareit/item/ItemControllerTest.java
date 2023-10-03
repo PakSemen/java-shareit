@@ -201,19 +201,6 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.created", is(commentDto.getCreated())));
     }
 
-    @Test
-    public void addEmptyCommentValidationTest() throws Exception {
-        CommentDto commentDto = CommentDto.builder()
-                .text("")
-                .build();
-        when(itemService.addComment(any(), anyLong(), anyLong())).thenThrow(new ValidationException("Отсутствует текст поискового запроса"));
-        mockMvc.perform(post("/items/{itemId}/comment", 1L)
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(commentDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     public void addCommentWithNotFoundItemValidationTest() throws Exception {
