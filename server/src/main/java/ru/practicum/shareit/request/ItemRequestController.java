@@ -33,10 +33,8 @@ public class ItemRequestController {
     @GetMapping("/{requestId}")
     public ItemRequestDto getRequestById(@RequestHeader(REQUEST_HEADER_USER_ID) Long id,
                                          @PathVariable Long requestId) {
-        ItemRequestDto itemRequestDto = requestService.getRequestById(id, requestId);
         log.debug("Get requests by id = {}", id);
-        log.info("Get request = {}", itemRequestDto);
-        return itemRequestDto;
+        return requestService.getRequestById(id, requestId);
     }
 
     @GetMapping("/all")
