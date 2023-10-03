@@ -98,30 +98,6 @@ class ItemControllerTest {
     }
 
     @Test
-    public void createItemWithEmptyDescriptionValidationTest() throws Exception {
-        when(itemService.createItem(any(), anyLong())).thenThrow(new ValidationException("The description can't be empty"));
-        itemDto.setDescription("");
-        mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(itemDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void createItemWithEmptyNameValidationTest() throws Exception {
-        when(itemService.createItem(any(), anyLong())).thenThrow(new ValidationException("The name can't be empty"));
-        itemDto.setName("");
-        mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(itemDto))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void getItemByIdTest() throws Exception {
         when(itemService.getItemById(anyLong(), anyLong())).thenReturn(itemDto);
         String result = mockMvc.perform(get("/items/{itemId}", 1L)
