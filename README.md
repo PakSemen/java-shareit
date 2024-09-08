@@ -70,10 +70,8 @@ Java, SpringBoot, Maven, JUnit, RESTful API, Postgresql, Docker, Shell, MockMVC.
    же формате, что и в эндпоинте GET /requests. Посмотреть данные об отдельном запросе может любой пользователь.
 
 ## Описание базы данных
-На диаграмме ниже представлен визуальный обзор базы данных Java-shareit и связей между таблицами.
+На UML диаграмме ниже представлен визуальный обзор базы данных Java-shareit и показаны отношения между таблицами.
 ![Java-shareit project data base](server/src/main/resources/db_schema_shareit.png)
-
-[исходник диаграммы](https://drive.google.com/file/d/1GrEYdtTaxIOHjS7wLhHCFe4MVzbduqSR/view?usp=sharing)
 
 Ниже приведен обзор таблиц базы данных:
 - users: содержит данные о пользователях.
