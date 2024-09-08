@@ -1,3 +1,4 @@
+![Java-shareit project]( https://github.com/PakSemen/java-shareit/blob/main/share.jpg )
 # Java-shareit project
 
 Данный проект - сервис для шеринга (от англ. share — «делиться») вещей, он обеспечивает пользователям, во-первых,
@@ -8,7 +9,7 @@
 театральной постановки. По запросу можно будет добавлять новые вещи для шеринга.
 
 # Технологии
-Java, SpringBoot, Maven, JUnit, RESTful API, Postgresql, Doker, Shell, MockMVC.
+Java, SpringBoot, Maven, JUnit, RESTful API, Postgresql, Docker, Shell, MockMVC.
 
 ## Описание функционала
 Приложение ShareIt состоит из двух частей, которые общаются друг с другом через REST: 
